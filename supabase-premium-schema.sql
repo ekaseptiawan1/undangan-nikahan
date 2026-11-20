@@ -56,3 +56,7 @@ drop policy if exists "Owners add own templates" on public.wedding_templates;
 create policy "Owners add own templates" on public.wedding_templates for insert to authenticated with check (auth.uid() = owner_id);
 drop policy if exists "Owners delete own templates" on public.wedding_templates;
 create policy "Owners delete own templates" on public.wedding_templates for delete to authenticated using (auth.uid() = owner_id);
+
+-- Metadata untuk preset musik (20.000 kombinasi rekomendasi, audio memakai URL HTTPS yang sah).
+alter table public.invitations add column if not exists music_title text default '';
+alter table public.invitations add column if not exists music_preset text default '';
