@@ -27,7 +27,7 @@
 <div id="musicPresetGrid" class="templates"></div>
 <div class="row" id="musicPager"></div>
 <div class="grid">
- <div class="field"><label>Judul musik</label><input id="music_title" placeholder="Contoh: Romantic Piano"></div>
+ <div class="field"><label>Judul musik</label><input id="music_title" placeholder="Contoh: Romantic Piano"><input id="music_preset" type="hidden"></div>
  <div class="field"><label>URL MP3/audio HTTPS</label><input id="music_url" type="url" placeholder="https://domain.com/audio.mp3"></div>
 </div>
 <div class="row"><button type="button" class="btn alt" id="musicPreviewBtn">▶ Tes audio</button><span class="muted" id="musicTestStatus">Belum ada audio yang diuji.</span></div>
@@ -36,7 +36,7 @@
 <p class="muted">Gunakan URL HTTPS langsung ke file audio. Jangan gunakan link halaman pemutar atau file tanpa izin. Browser hanya mulai memutar setelah tamu membuka undangan.</p>
 <div class="actions"><button class="btn" id="saveBtn">Simpan undangan</button><button class="btn alt" id="cancelBtn">Batal</button><button class="btn alt hidden" id="publishBtn">Publikasikan</button></div><p class="muted">Link publik: <span id="publicLink">Muncul setelah disimpan</span></p></div>
 </div></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="music-catalog.js"></script><script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="template-catalog.js"></script><script src="music-catalog.js"></script><script>
 const $=id=>document.getElementById(id);let db=null,user=null,currentId=null,templates=[],selectedTemplate=null;const fields=["bride_name","groom_name","bride_parents","groom_parents","event_date","date_label","akad_time","reception_time","venue_name","venue_address","maps_url","whatsapp","bride_photo","groom_photo","gallery1","gallery2","gallery3","slug","music_url","music_title","music_preset"];
 const builtins=[{id:"builtin-classic",name:"Classic Garden",theme_key:"classic",theme_primary:"#536b59",theme_accent:"#b58a5a",theme_bg:""},{id:"builtin-royal",name:"Royal Romance",theme_key:"royal",theme_primary:"#71485c",theme_accent:"#bd9a68",theme_bg:""},{id:"builtin-modern",name:"Modern Minimal",theme_key:"modern",theme_primary:"#354c57",theme_accent:"#a97858",theme_bg:""},{id:"builtin-garden",name:"Botanical Garden",theme_key:"garden",theme_primary:"#63764e",theme_accent:"#b18b55",theme_bg:""},{id:"builtin-noir",name:"Elegant Noir",theme_key:"noir",theme_primary:"#292d32",theme_accent:"#ad8959",theme_bg:""},{id:"builtin-terracotta",name:"Terracotta Love",theme_key:"terracotta",theme_primary:"#9a5947",theme_accent:"#c18a62",theme_bg:""}];
 const defaults={bride_name:"Nama Mempelai Wanita",groom_name:"Nama Mempelai Pria",bride_parents:"Putri dari Bapak ... & Ibu ...",groom_parents:"Putra dari Bapak ... & Ibu ...",event_date:"2026-12-20T08:00:00+07:00",date_label:"Minggu, 20 Desember 2026",akad_time:"08.00 WIB – selesai",reception_time:"11.00 – 14.00 WIB",venue_name:"Nama gedung",venue_address:"Alamat lengkap, Kota",maps_url:"",whatsapp:"6281234567890",bride_photo:"",groom_photo:"",gallery1:"",gallery2:"",gallery3:"",slug:"",music_url:"",music_title:"",music_preset:""};
@@ -56,10 +56,41 @@ async function save(){const row=readForm();if(!row.bride_name||!row.groom_name||
 async function togglePublish(id,v){const {error}=await db.from("invitations").update({is_published:v}).eq("id",id);if(error){alert(error.message);return}await list();if(currentId===id){$("publishBtn").textContent=v?"Jadikan draft":"Publikasikan";$("publishBtn").onclick=()=>togglePublish(id,!v)}}
 async function remove(id){if(!confirm("Hapus undangan ini secara permanen?"))return;const {error}=await db.from("invitations").delete().eq("id",id);if(error){alert(error.message);return}if(currentId===id)show("editor",false);await list()}
 async function saveTemplate(){const name=$("t_name").value.trim();if(!name){alert("Isi nama template.");return}const row={owner_id:user.id,name,theme_key:$("t_key").value,theme_primary:$("t_primary").value,theme_accent:$("t_accent").value,theme_bg:$("t_bg").value.trim()};const {error}=await db.from("wedding_templates").insert(row);if(error){alert("Gagal menyimpan template: "+error.message);return}show("templateForm",false);$("t_name").value="";$("t_bg").value="";await loadTemplates();alert("Template berhasil ditambahkan ke koleksi akunmu.")}
-async function init(){if(!window.supabase||!APP_CONFIG.SUPABASE_URL||!APP_CONFIG.SUPABASE_ANON_KEY){$("loginBox").textContent="Konfigurasi Supabase belum diisi pada config.js.";return}db=window.supabase.createClient(APP_CONFIG.SUPABASE_URL,APP_CONFIG.SUPABASE_ANON_KEY);const {data:{session}}=await db.auth.getSession();if(session){user=session.user;show("loginBox",false);show("app",true);await Promise.all([list(),loadTemplates()])}}
+
+function renderMusicPresets(){
+ const cat=window.WeddingMusicCatalog;if(!cat)return;
+ const q=$("musicSearch").value.toLowerCase(),m=$("musicMood").value;
+ const style=(selectedTemplate?.theme_key||"classic").toLowerCase().split("-")[0];
+ const list=cat.generate().filter(p=>(!q||(p.name+" "+p.mood+" "+p.instruments).toLowerCase().includes(q))&&(!m||p.mood_key===m));
+ list.sort((x,y)=>(y.design_keys.includes(style)?1:0)-(x.design_keys.includes(style)?1:0));
+ const pageSize=24,pages=Math.max(1,Math.ceil(list.length/pageMusic));pageMusic=Math.min(pageMusic,pages-1);
+ const host=$("musicPresetGrid");host.innerHTML="";
+ list.slice(pageMusic*pageSize,(pageMusic+1)*pageSize).forEach(p=>{
+  const b=document.createElement("button");b.type="button";b.className="template";
+  const sw=document.createElement("div");sw.className="swatch";sw.style.setProperty("--p",p.color);sw.style.setProperty("--a",p.accent);
+  const n=document.createElement("b");n.textContent=p.name;
+  const sm=document.createElement("small");sm.textContent=p.instruments+" • "+p.tempo+" BPM • "+p.duration;
+  b.append(sw,n,sm);b.onclick=()=>{$("music_preset").value=p.id;$("music_title").value=p.name;$("musicPresetInfo").textContent="Preset "+p.id+" dipilih untuk desain "+(selectedTemplate?.name||"undangan")+". Masukkan URL HTTPS audio agar dapat diputar.";host.querySelectorAll(".template").forEach(x=>x.classList.remove("selected"));b.classList.add("selected")};host.append(b);
+ });
+ $("musicPresetInfo").textContent=list.length.toLocaleString("id-ID")+" preset tersedia • disarankan untuk gaya "+style+". Halaman "+(pageMusic+1)+"/"+pages;
+ $("musicPager").innerHTML="";
+ const prev=document.createElement("button");prev.className="btn alt";prev.textContent="←";prev.disabled=pageMusic===0;prev.onclick=()=>{pageMusic--;renderMusicPresets()};
+ const next=document.createElement("button");next.className="btn alt";next.textContent="→";next.disabled=pageMusic>=pages-1;next.onclick=()=>{pageMusic++;renderMusicPresets()};
+ $("musicPager").append(prev,next);
+}
+let pageMusic=0;
+$("musicSearch").addEventListener("input",()=>{pageMusic=0;renderMusicPresets()});
+$("musicMood").addEventListener("change",()=>{pageMusic=0;renderMusicPresets()});
+$("musicPreviewBtn").onclick=()=>{
+ const url=$("music_url").value.trim(),audio=$("adminMusicPreview");
+ if(!/^https:\/\//i.test(url)){alert("Masukkan URL HTTPS audio terlebih dahulu.");return}
+ audio.src=url;audio.style.display="block";
+ audio.play().then(()=>{$("musicTestStatus").textContent="Audio berhasil mulai diputar."}).catch(()=>{$("musicTestStatus").textContent="Audio gagal diputar. Periksa URL langsung, format, dan izin server."});
+};
+\nasync function init(){if(!window.supabase||!APP_CONFIG.SUPABASE_URL||!APP_CONFIG.SUPABASE_ANON_KEY){$("loginBox").textContent="Konfigurasi Supabase belum diisi pada config.js.";return}db=window.supabase.createClient(APP_CONFIG.SUPABASE_URL,APP_CONFIG.SUPABASE_ANON_KEY);const {data:{session}}=await db.auth.getSession();if(session){user=session.user;show("loginBox",false);show("app",true);await Promise.all([list(),loadTemplates()])}}
 $("loginBtn").onclick=async()=>{const {data,error}=await db.auth.signInWithPassword({email:$("email").value,password:$("password").value});if(error){alert(error.message);return}user=data.user;show("loginBox",false);show("app",true);await Promise.all([list(),loadTemplates()])};
 $("signupBtn").onclick=async()=>{const {error}=await db.auth.signUp({email:$("email").value,password:$("password").value});alert(error?error.message:"Pendaftaran dikirim. Verifikasi email jika diminta, lalu login.")};
 $("logoutBtn").onclick=async()=>{await db.auth.signOut();user=null;show("app",false);show("loginBox",true)};
 $("newBtn").onclick=newForm;$("saveBtn").onclick=save;$("cancelBtn").onclick=()=>show("editor",false);$("addTemplateBtn").onclick=()=>show("templateForm",true);$("cancelTemplateBtn").onclick=()=>show("templateForm",false);$("saveTemplateBtn").onclick=saveTemplate;
 ["bride_name","groom_name"].forEach(id=>$(id).addEventListener("input",updatePreview));init();
-</script><script src="template-catalog.js"></script></body></html>
+</script></body></html>
