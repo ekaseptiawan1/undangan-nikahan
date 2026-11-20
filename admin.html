@@ -83,10 +83,11 @@ let pageMusic=0;
 $("musicSearch").addEventListener("input",()=>{pageMusic=0;renderMusicPresets()});
 $("musicMood").addEventListener("change",()=>{pageMusic=0;renderMusicPresets()});
 $("musicPreviewBtn").onclick=()=>{
- const url=$("music_url").value.trim(),audio=$("adminMusicPreview");
- if(!/^https:\/\//i.test(url)){alert("Masukkan URL HTTPS audio terlebih dahulu.");return}
- audio.src=url;audio.style.display="block";
- audio.play().then(()=>{$("musicTestStatus").textContent="Audio berhasil mulai diputar."}).catch(()=>{$("musicTestStatus").textContent="Audio gagal diputar. Periksa URL langsung, format, dan izin server."});
+ const url=$("music_soundcloud_url").value.trim()||$("music_url").value.trim(),audio=$("adminMusicPreview"),sc=$("adminSoundCloudPreview");
+ if(!/^https:\/\//i.test(url)){alert("Masukkan URL HTTPS MP3/audio atau SoundCloud terlebih dahulu.");return}
+ if(/soundcloud\.com/i.test(url)){audio.pause();audio.style.display="none";sc.src="https://w.soundcloud.com/player/?url="+encodeURIComponent(url)+"&auto_play=true&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=false";sc.style.display="block";$("musicTestStatus").textContent="Pemutar SoundCloud dimuat. Tekan Play pada pemutar.";return}
+ sc.src="";sc.style.display="none";audio.src=url;audio.style.display="block";
+ audio.play().then(()=>$("musicTestStatus").textContent="Audio berhasil mulai diputar.").catch(()=>$("musicTestStatus").textContent="Audio gagal diputar. Periksa URL langsung, format, dan izin server.");
 };
 async function init(){if(!window.supabase||!APP_CONFIG.SUPABASE_URL||!APP_CONFIG.SUPABASE_ANON_KEY){$("loginBox").textContent="Konfigurasi Supabase belum diisi pada config.js.";return}db=window.supabase.createClient(APP_CONFIG.SUPABASE_URL,APP_CONFIG.SUPABASE_ANON_KEY);const {data:{session}}=await db.auth.getSession();if(session){user=session.user;show("loginBox",false);show("app",true);await Promise.all([list(),loadTemplates()])}}
 $("loginBtn").onclick=async()=>{const {data,error}=await db.auth.signInWithPassword({email:$("email").value,password:$("password").value});if(error){alert(error.message);return}user=data.user;show("loginBox",false);show("app",true);await Promise.all([list(),loadTemplates()])};
