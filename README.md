@@ -1,7 +1,7 @@
 # Undangan Pernikahan Premium + Multi Template + Musik
 
 ## Fitur
-- 6 desain bawaan: Classic Garden, Royal Romance, Modern Minimal, Botanical Garden, Elegant Noir, Terracotta Love.
+- 20.000 variasi desain generator (kombinasi palet warna, font, layout, ornamen, dan foto cover) plus template custom.
 - Dashboard untuk membuat banyak undangan, edit, draft/publish, hapus.
 - Tambah template custom sendiri: nama, gaya dasar, warna utama, warna aksen, foto cover.
 - Setiap undangan memiliki template dan musik sendiri.
@@ -27,5 +27,5 @@ Aktifkan Settings > Pages > Deploy from a branch > main > /(root).
 Masukkan URL file audio publik HTTPS (misalnya file `.mp3`). File audio harus dapat diakses tanpa login. Browser HP umumnya melarang autoplay bersuara; musik dicoba mulai setelah tamu menekan tombol "Buka Undangan". Tombol musik akan muncul untuk play/pause.
 Gunakan musik original, berlisensi, atau public domain yang boleh dipakai.
 
-## Template custom
+## Koleksi 20.000 desain\nKatalog dibuat secara lokal oleh `template-catalog.js`. Dashboard menampilkan hasil dengan pencarian, filter kategori, dan pagination (36 desain per halaman), sehingga tidak merender 20.000 kartu sekaligus. Ini adalah 20.000 variasi kombinasi desain, bukan 20.000 file HTML terpisah.\n\n## Template custom
 Dashboard > Koleksi Template > Tambah template. Template custom menyimpan nama, palet warna, gaya dasar, dan URL background cover. Template ini dapat dipilih saat membuat/edit undangan.
