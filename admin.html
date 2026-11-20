@@ -87,7 +87,7 @@ $("musicPreviewBtn").onclick=()=>{
  audio.src=url;audio.style.display="block";
  audio.play().then(()=>{$("musicTestStatus").textContent="Audio berhasil mulai diputar."}).catch(()=>{$("musicTestStatus").textContent="Audio gagal diputar. Periksa URL langsung, format, dan izin server."});
 };
-\nasync function init(){if(!window.supabase||!APP_CONFIG.SUPABASE_URL||!APP_CONFIG.SUPABASE_ANON_KEY){$("loginBox").textContent="Konfigurasi Supabase belum diisi pada config.js.";return}db=window.supabase.createClient(APP_CONFIG.SUPABASE_URL,APP_CONFIG.SUPABASE_ANON_KEY);const {data:{session}}=await db.auth.getSession();if(session){user=session.user;show("loginBox",false);show("app",true);await Promise.all([list(),loadTemplates()])}}
+async function init(){if(!window.supabase||!APP_CONFIG.SUPABASE_URL||!APP_CONFIG.SUPABASE_ANON_KEY){$("loginBox").textContent="Konfigurasi Supabase belum diisi pada config.js.";return}db=window.supabase.createClient(APP_CONFIG.SUPABASE_URL,APP_CONFIG.SUPABASE_ANON_KEY);const {data:{session}}=await db.auth.getSession();if(session){user=session.user;show("loginBox",false);show("app",true);await Promise.all([list(),loadTemplates()])}}
 $("loginBtn").onclick=async()=>{const {data,error}=await db.auth.signInWithPassword({email:$("email").value,password:$("password").value});if(error){alert(error.message);return}user=data.user;show("loginBox",false);show("app",true);await Promise.all([list(),loadTemplates()])};
 $("signupBtn").onclick=async()=>{const {error}=await db.auth.signUp({email:$("email").value,password:$("password").value});alert(error?error.message:"Pendaftaran dikirim. Verifikasi email jika diminta, lalu login.")};
 $("logoutBtn").onclick=async()=>{await db.auth.signOut();user=null;show("app",false);show("loginBox",true)};
