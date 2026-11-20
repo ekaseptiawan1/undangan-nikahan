@@ -2,5 +2,5 @@
 // Pakai anon/publishable key saja. Jangan pernah masukkan service_role/secret key.
 const APP_CONFIG = {
   SUPABASE_URL: "https://uqxxuwjnxgbrcqfymfok.supabase.co/rest/v1/",
-  SUPABASE_ANON_KEY: "PASTE_ANON_OR_PUBLISHABLE_KEY_HERE"
+  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxeHh1d2pueGdicmNxZnltZm9rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxNjc4ODgsImV4cCI6MjExMDc0Mzg4OH0.I7F5eQjYsJ6HeplRieJkpkRlgBbLmPRKSt6p9lhJRi4"
 };
