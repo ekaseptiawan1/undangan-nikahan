@@ -46,4 +46,4 @@ $("signupBtn").onclick=async()=>{const {error}=await db.auth.signUp({email:$("em
 $("logoutBtn").onclick=async()=>{await db.auth.signOut();user=null;show("app",false);show("loginBox",true)};
 $("newBtn").onclick=newForm;$("saveBtn").onclick=save;$("cancelBtn").onclick=()=>show("editor",false);$("addTemplateBtn").onclick=()=>show("templateForm",true);$("cancelTemplateBtn").onclick=()=>show("templateForm",false);$("saveTemplateBtn").onclick=saveTemplate;
 ["bride_name","groom_name"].forEach(id=>$(id).addEventListener("input",updatePreview));init();
-</script></body></html>
+</script><script src="template-catalog.js"></script></body></html>
