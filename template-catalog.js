@@ -32,6 +32,7 @@
  }
  window.WeddingTemplateCatalog={generate,fonts,ornaments,total:20000};
  if(typeof builtins!=="undefined" && Array.isArray(builtins)) builtins.push(...generate().slice(6));
+ if(typeof builtins!=="undefined" && Array.isArray(builtins) && builtins.length) builtins[0].name="Template1";
  if(typeof renderTemplateCards==="function"){
   const pageState={};
   renderTemplateCards=function(target,selectable){
@@ -47,7 +48,7 @@
     bar.querySelector("select").addEventListener("change",()=>{pageState[target]=0;renderTemplateCards(target,selectable)});
    }
    const q=bar.querySelector("input").value.toLowerCase(),cat=bar.querySelector("select").value;
-   const all=allTemplates(),filtered=all.filter(t=>(!q||t.name.toLowerCase().includes(q)||t.theme_key.toLowerCase().includes(q))&&(!cat||t.theme_key.includes(cat)));
+   const all=target==="templateLibrary"?allTemplates().slice(0,1):allTemplates(),filtered=all.filter(t=>(!q||t.name.toLowerCase().includes(q)||t.theme_key.toLowerCase().includes(q))&&(!cat||t.theme_key.includes(cat)));
    const per=36,totalPages=Math.max(1,Math.ceil(filtered.length/per));pageState[target]=Math.min(pageState[target],totalPages-1);
    host.innerHTML="";
    filtered.slice(pageState[target]*per,(pageState[target]+1)*per).forEach(t=>{
